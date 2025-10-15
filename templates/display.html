@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px; /* Ensure consistent width */
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 500px; /* Set a minimum height for consistency */
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around; /* Add spacing between buttons */
+            margin-bottom: 20px;
+        }
+        .tabs button {
+            width: 300px; /* Make the buttons longer for full screen */
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px; /* Increase font size for better visibility */
+        }
+        .tabs button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 600px) {
+            .tabs {
+                flex-direction: column; /* Stack buttons vertically */
+                align-items: center;
+            }
+            .tabs button {
+                width: 80%; /* Adjust width for smaller screens */
+                margin-bottom: 10px; /* Add spacing between buttons */
+            }
+        }
+        .message {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message img {
+            max-width: 100%;
+            height: auto;
+        }
+        .message .group {
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button id="uploadTab">上載感恩分享</button>
+            <button id="viewTab">查看分享</button>
+        </div>
+        <h1>感恩分享訊息</h1>
+        <div class="filter">
+            <label for="groupFilter">顯示群體:</label>
+            <select id="groupFilter">
+                <option value="">所有群體</option>
+                <option value="D21">D21</option>
+                <option value="Nephesh">Nephesh</option>
+                <option value="成人崇拜">成人崇拜</option>
+                <option value="長青團契">長青團契</option>
+            </select>
+        </div>
+
+        <div id="messages">
+            {% for message in messages|reverse %} <!-- Reverse the order of messages -->
+            <div class="message">
+                <p class="group">Group: {{ message.group }}</p>
+                {% if message.text %}
+                <p>{{ message.text }}</p>
+                {% endif %}
+                {% if message.image %}
+                <img src="{{ message.image }}" alt="Uploaded Image">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script>
+        const uploadTab = document.getElementById('uploadTab');
+        const viewTab = document.getElementById('viewTab');
+
+        uploadTab.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        viewTab.addEventListener('click', () => {
+            window.location.href = '/display';
+        });
+
+        const groupFilter = document.getElementById('groupFilter');
+        groupFilter.addEventListener('change', () => {
+            const selectedGroup = groupFilter.value;
+            const messages = document.querySelectorAll('.message');
+
+            messages.forEach(message => {
+                const group = message.querySelector('.group').textContent.replace('Group: ', '');
+                if (selectedGroup === '' || group === selectedGroup) {
+                    message.style.display = 'block';
+                } else {
+                    message.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

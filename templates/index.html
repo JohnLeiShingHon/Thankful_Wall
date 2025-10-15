@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>播道書院道真堂 20 周年感恩分享會 感恩牆</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px; /* Ensure consistent width */
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 500px; /* Set a minimum height for consistency */
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around; /* Add spacing between buttons */
+            margin-bottom: 20px;
+        }
+        .tabs button {
+            width: 300px; /* Make the buttons longer for full screen */
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px; /* Increase font size for better visibility */
+        }
+        .tabs button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 600px) {
+            .tabs {
+                flex-direction: column; /* Stack buttons vertically */
+                align-items: center;
+            }
+            .tabs button {
+                width: 80%; /* Adjust width for smaller screens */
+                margin-bottom: 10px; /* Add spacing between buttons */
+            }
+        }
+        .message-form {
+            margin-bottom: 20px;
+        }
+        .message-form input, .message-form textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .message-form button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .message-form button:hover {
+            background-color: #0056b3;
+        }
+        .messages {
+            margin-top: 20px;
+        }
+        .message {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message img {
+            max-width: 100%;
+            height: auto;
+        }
+        .qr-code {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .qr-code img {
+            max-width: 200px;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+        }
+        .form-group select, .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button id="uploadTab">上載感恩分享</button>
+            <button id="viewTab">查看分享</button>
+        </div>
+
+        <div id="uploadSection">
+            <h1>播道書院道真堂 20 周年感恩分享會 感恩牆</h1>
+            <form class="message-form" id="messageForm">
+                <div class="form-group">
+                    <label for="messageGroup">群體</label>
+                    <select id="messageGroup" required>
+                        <option value="">請選擇群體</option>
+                        <option value="D21">D21</option>
+                        <option value="Nephesh">Nephesh</option>
+                        <option value="成人崇拜">成人崇拜</option>
+                        <option value="長青團契">長青團契</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="messageText">感恩分享訊息</label>
+                    <textarea id="messageText" placeholder="請輸入感恩分享訊息" required></textarea>
+                </div>
+
+                <label for="messageImageFile">圖片上載</label>
+                <input type="file" id="messageImageFile" accept="image/*">
+                <button type="submit">提交</button>
+            </form>
+            <div class="qr-code">
+                <h2>掃描以訪問</h2>
+                <img src="/qrcode" alt="QR Code for localhost">
+            </div>
+        </div>
+
+        <div class="messages" id="messages" style="display:none;"></div>
+
+        <script>
+            const form = document.getElementById('messageForm');
+            const messagesDiv = document.getElementById('messages');
+
+            // Fetch and display messages
+            async function fetchMessages() {
+                const response = await fetch('/messages');
+                const messages = await response.json();
+                messagesDiv.innerHTML = '';
+                messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message';
+                    messageDiv.innerHTML = `<p>${msg.text}</p>`;
+                    if (msg.image) {
+                        const img = document.createElement('img');
+                        img.src = msg.image;
+                        messageDiv.appendChild(img);
+                    }
+                    messagesDiv.appendChild(messageDiv);
+                });
+            }
+
+            // Handle image upload
+            async function uploadImage(file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    alert('Image upload failed');
+                    return null;
+                }
+
+                const data = await response.json();
+                return data.image_url;
+            }
+
+            // Handle form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const text = document.getElementById('messageText').value;
+                const imageFile = document.getElementById('messageImageFile').files[0];
+                const group = document.getElementById('messageGroup').value;
+
+                if (!group) {
+                    alert('Please select a group');
+                    return;
+                }
+
+                let imageUrl = '';
+                if (imageFile) {
+                    imageUrl = await uploadImage(imageFile);
+                    if (!imageUrl) return; // Stop if image upload fails
+                }
+
+                await fetch('/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, image: imageUrl, group })
+                });
+
+                form.reset();
+                window.location.href = '/display'; // Fix auto-redirect
+            });
+
+            // Tab navigation
+            const uploadTab = document.getElementById('uploadTab');
+            const viewTab = document.getElementById('viewTab');
+
+            uploadTab.addEventListener('click', () => {
+                window.location.href = '/';
+            });
+
+            viewTab.addEventListener('click', () => {
+                window.location.href = '/display';
+            });
+
+            // Initial fetch
+            fetchMessages();
+        </script>
+    </div>
+</body>
+</html>
