@@ -102,6 +102,11 @@ def generate_qr_code():
 
     return send_file(img_path, mimetype='image/png')
 
+@app.route('/')
+def home():
+    """Redirect root URL to the display page."""
+    return redirect(url_for('display_messages'))
+
 if __name__ == '__main__':
     print("Server running at: http://20.243.178.136:5000")
     app.run(host='0.0.0.0', port=5000, debug=True)
