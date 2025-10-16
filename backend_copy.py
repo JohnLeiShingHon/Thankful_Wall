@@ -12,6 +12,10 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Ensure a static directory exists for serving files
+STATIC_FOLDER = 'static'
+os.makedirs(STATIC_FOLDER, exist_ok=True)
+
 CSV_FILE = 'data.csv'
 VALID_GROUPS = ["D21", "Nephesh", "成人崇拜", "長青團契"]
 
@@ -102,7 +106,7 @@ def generate_qr_code():
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
-    img_path = "qrcode.png"
+    img_path = os.path.join(STATIC_FOLDER, "qrcode.png")
     img.save(img_path)
 
     return send_file(img_path, mimetype='image/png')
