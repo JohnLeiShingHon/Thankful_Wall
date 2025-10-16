@@ -104,8 +104,8 @@ def generate_qr_code():
 
 @app.route('/')
 def home():
-    """Redirect root URL to the display page."""
-    return redirect(url_for('display_messages'))
+    """Serve the index page."""
+    return render_template('index.html')
 
 if __name__ == '__main__':
     print("Server running at: http://20.243.178.136:5000")
