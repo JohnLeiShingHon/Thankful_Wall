@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 import os
 import csv
 import qrcode
+import socket
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -85,8 +86,12 @@ def serve_image(filename):
 
 @app.route('/qrcode', methods=['GET'])
 def generate_qr_code():
-    """Generate and serve a QR code for the public IP URL."""
-    public_ip_url = "http://20.243.178.136:5000"
+    """Generate and serve a QR code for the current IP URL."""
+    # Dynamically get the server's public IP address
+    hostname = socket.gethostname()
+    public_ip = socket.gethostbyname(hostname)
+    public_ip_url = f"http://{public_ip}:5000"
+
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
