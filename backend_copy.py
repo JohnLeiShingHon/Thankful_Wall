@@ -90,11 +90,9 @@ def serve_image(filename):
 
 @app.route('/qrcode', methods=['GET'])
 def generate_qr_code():
-    """Generate and serve a QR code for the current IP URL."""
-    # Dynamically get the server's public IP address
-    hostname = socket.gethostname()
-    public_ip = socket.gethostbyname(hostname)
-    public_ip_url = f"http://{public_ip}:5000"
+    """Generate and serve a QR code for the current app URL."""
+    # Dynamically get the app's URL from the request
+    host_url = request.host_url.rstrip('/')
 
     qr = qrcode.QRCode(
         version=1,
@@ -102,7 +100,7 @@ def generate_qr_code():
         box_size=10,
         border=4,
     )
-    qr.add_data(public_ip_url)
+    qr.add_data(host_url)
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
